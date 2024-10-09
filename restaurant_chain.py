@@ -30,13 +30,32 @@ class RestaurantChain:
         """
         self.llm = ChatOpenAI(model="gpt-3.5-turbo")
         self.retriever = None
-        self.general_restaurant_chain  = None
+        self.general_restaurant_chain = None
         self.michelin_guide_chain = None
         self.restaurant_type_route_chain = None
+        self.embeddings = OpenAIEmbeddings()
 
     def build_michelin_guide_rag(self):
         ## Build a RAG for Michelin guide information
-        # read source data and provide data description
+        vectorstore = Chroma(collection_name="michelin_guide_restaurants", embedding_function=self.embeddings)
+        
+        # Check if data already exists in Chroma
+        if vectorstore.get()['ids']:
+            print("Loading existing data from Chroma...")
+        else:
+            print("No existing data found. Loading from CSV and storing in Chroma...")
+            self._load_and_store_data(vectorstore)
+
+        store = InMemoryStore()
+        child_splitter = RecursiveCharacterTextSplitter(chunk_size=200)
+        
+        self.retriever = ParentDocumentRetriever(
+            vectorstore=vectorstore,
+            docstore=store,
+            child_splitter=child_splitter,
+        )
+
+    def _load_and_store_data(self, vectorstore):
         michelin_guide_restaurants_path = "dataset/test_canada_michelin_guide_restaurants_Aug2024.csv"
         loader = CSVLoader(
             file_path=michelin_guide_restaurants_path,
@@ -48,18 +67,7 @@ class RestaurantChain:
             },
         )
         documents = loader.load()
-        # initialize a Chroma vector store and memory for storing and retrieving embedded documents
-        vectorstore = Chroma(collection_name="full_documents", embedding_function=OpenAIEmbeddings())
-        store = InMemoryStore()
-        # text splitter for splitting child documents
-        child_splitter = RecursiveCharacterTextSplitter(chunk_size=200)
-        # step4: ParentDocumentRetriever that combines the vector store, document store, and child document splitter
-        self.retriever = ParentDocumentRetriever(
-            vectorstore=vectorstore,
-            docstore=store,
-            child_splitter=child_splitter,
-        )
-        self.retriever.add_documents(documents, ids=None)
+        vectorstore.add_documents(documents)
 
     def build_restaurant_recommendation_chain(self):
         general_restaurant_template = """
