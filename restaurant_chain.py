@@ -33,11 +33,9 @@ class RestaurantChain:
         
         self.michelin_guide_chain = None
         self.embeddings = OpenAIEmbeddings()
-
-        self.michelin_guide_rag = self.build_michelin_recommendation_chain()
-        self.general_restaurant_chain = self.build_general_recommendation_chain()
-
         self.retriever = self.build_michelin_guide_rag()
+        self.general_restaurant_chain = self.build_general_recommendation_chain()
+        self.michelin_guide_chain = self.build_michelin_recommendation_chain()
         self.restaurant_type_route_chain = self.define_restaurant_type_route_chain()
 
 

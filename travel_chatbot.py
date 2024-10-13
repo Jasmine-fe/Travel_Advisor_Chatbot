@@ -49,6 +49,7 @@ service_prompts = {
     "tourist_attraction": "You are an expert in finding tourist attractions.",
     "itinerary_planning": "You are an expert in travel itinerary planning.",
     "exploring_travel_ideas": "You are an expert in recommending travel ideas.",
+    "restaurant_recommendations": "You are an expert in restaurant recommendations.",
     "others": "You are a friendly and helpful chatbot."
 }
 
