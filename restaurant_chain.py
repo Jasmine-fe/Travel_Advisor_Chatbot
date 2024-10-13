@@ -34,6 +34,10 @@ class RestaurantChain:
         self.michelin_guide_chain = None
         self.restaurant_type_route_chain = None
         self.embeddings = OpenAIEmbeddings()
+        self.michelin_guide_rag = self.build_michelin_guide_rag()
+        self.restaurant_recommendation_chain = self.build_restaurant_recommendation_chain()
+        self.restaurant_type_route_chain = self.define_restaurant_type_route_chain()
+
 
     def build_michelin_guide_rag(self):
         ## Build a RAG for Michelin guide information
@@ -123,10 +127,6 @@ class RestaurantChain:
         return res
 
     def get_restaurant_chain(self):
-        self.build_michelin_guide_rag()
-        self.build_restaurant_recommendation_chain()
-        self.define_restaurant_type_route_chain()
-
         restaurant_chain = {
             "restaurant_type": self.restaurant_type_route_chain,
             "message": lambda x: x['message']
