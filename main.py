@@ -1,5 +1,5 @@
-from travel_chatbot_chain import chatbot_chain
-# main
+from travel_chatbot import chatbot_chain
+
 if __name__ == "__main__":
     print("What can I help you with? (Type 'exit' to end)")
     user_input = input()

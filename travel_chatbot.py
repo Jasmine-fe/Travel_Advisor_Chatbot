@@ -16,7 +16,6 @@ from langchain.storage import InMemoryStore
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.memory import ConversationBufferMemory
 from langchain_core.messages import HumanMessage, AIMessage
-
 load_dotenv()
 
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
