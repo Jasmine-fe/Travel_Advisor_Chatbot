@@ -122,7 +122,7 @@ class RestaurantChain:
             res = None
         return res
 
-    def get_full_chains(self):
+    def get_restaurant_chain(self):
         self.build_michelin_guide_rag()
         self.build_restaurant_recommendation_chain()
         self.define_restaurant_type_route_chain()

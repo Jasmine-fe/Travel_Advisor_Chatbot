@@ -16,6 +16,7 @@ from langchain.storage import InMemoryStore
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.memory import ConversationBufferMemory
 from langchain_core.messages import HumanMessage, AIMessage
+from restaurant_chain import RestaurantChain
 load_dotenv()
 
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
@@ -62,6 +63,11 @@ service_chains = {
         memory=service_memories[service]
     ) for service in service_prompts.keys()
 }
+# Create chains for the restaurant recommendation service
+restaurantChain = RestaurantChain()
+restaurant_chain = restaurantChain.get_restaurant_chain()
+service_chains['restaurant_recommendations'] = restaurant_chain
+
 
 # Define the routing system
 class RouteMessage(TypedDict):
@@ -103,4 +109,3 @@ def get_chain_for_service(input):
     
 # Combine all the steps into the final chain
 chatbot_chain = {"service_type": route_chain, "message": lambda x: x['message']} | RunnableLambda(get_chain_for_service)
-
