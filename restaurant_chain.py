@@ -105,7 +105,7 @@ class RestaurantChain:
         route_prompt = ChatPromptTemplate.from_messages(
             [
                 ("system", route_system),
-                ("human", "{query}"),
+                ("human", "{message}"),
             ]
         )
         # Routing chain based on the query
@@ -129,8 +129,8 @@ class RestaurantChain:
 
         restaurant_chain = {
             "restaurant_type": self.restaurant_type_route_chain,
-            "query": lambda x: x['query']
+            "message": lambda x: x['message']
         } | RunnableLambda(
-            lambda x: self.get_restaurant_recommendation_result(restaurant_type=x["restaurant_type"], query=x['query'])
+            lambda x: self.get_restaurant_recommendation_result(restaurant_type=x["restaurant_type"], query=x['message'])
         )
         return restaurant_chain
