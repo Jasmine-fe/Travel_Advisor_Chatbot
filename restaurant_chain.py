@@ -29,13 +29,15 @@ class RestaurantChain:
         Initializes the RestaurantChain object with necessary components like LLM chain and prompt template.        
         """
         self.llm = ChatOpenAI(model="gpt-3.5-turbo")
-        self.retriever = None
-        self.general_restaurant_chain = None
+        
+        
         self.michelin_guide_chain = None
-        self.restaurant_type_route_chain = None
         self.embeddings = OpenAIEmbeddings()
-        self.michelin_guide_rag = self.build_michelin_guide_rag()
-        self.restaurant_recommendation_chain = self.build_restaurant_recommendation_chain()
+
+        self.michelin_guide_rag = self.build_michelin_recommendation_chain()
+        self.general_restaurant_chain = self.build_general_recommendation_chain()
+
+        self.retriever = self.build_michelin_guide_rag()
         self.restaurant_type_route_chain = self.define_restaurant_type_route_chain()
 
 
@@ -53,11 +55,12 @@ class RestaurantChain:
         store = InMemoryStore()
         child_splitter = RecursiveCharacterTextSplitter(chunk_size=200)
         
-        self.retriever = ParentDocumentRetriever(
+        retriever = ParentDocumentRetriever(
             vectorstore=vectorstore,
             docstore=store,
             child_splitter=child_splitter,
         )
+        return retriever
 
     def _load_and_store_data(self, vectorstore):
         michelin_guide_restaurants_path = "dataset/test_canada_michelin_guide_restaurants_Aug2024.csv"
@@ -73,11 +76,16 @@ class RestaurantChain:
         documents = loader.load()
         vectorstore.add_documents(documents)
 
-    def build_restaurant_recommendation_chain(self):
+    def build_general_recommendation_chain(self):
         general_restaurant_template = """
             You are a restaurant recommendation chatbot, you need to provide relevant suggestions based on their preference.  
             Question: {question}
         """
+        general_restaurant_prompt_template = ChatPromptTemplate.from_template(general_restaurant_template)
+        general_restaurant_chain = general_restaurant_prompt_template | self.llm | StrOutputParser()    
+        return general_restaurant_chain
+
+    def build_michelin_recommendation_chain(self):
         #TODO: optimize how to add additional information
         michelin_guide_template = """
             Information to understand the context: 
@@ -98,11 +106,9 @@ class RestaurantChain:
             Question: {question}
         """
 
-        general_restaurant_prompt_template = ChatPromptTemplate.from_template(general_restaurant_template)
         michelin_guide_prompt_template = ChatPromptTemplate.from_template(michelin_guide_template)
-
-        self.general_restaurant_chain = general_restaurant_prompt_template | self.llm | StrOutputParser()    
-        self.michelin_guide_chain = {"context": self.retriever, "question": RunnablePassthrough()} | michelin_guide_prompt_template | self.llm | StrOutputParser()
+        michelin_guide_chain = {"context": self.retriever, "question": RunnablePassthrough()} | michelin_guide_prompt_template | self.llm | StrOutputParser()
+        return michelin_guide_chain
 
     def define_restaurant_type_route_chain(self):
         route_system = "Route the user's query to either 'general' or 'michelin'"
@@ -112,8 +118,8 @@ class RestaurantChain:
                 ("human", "{message}"),
             ]
         )
-        # Routing chain based on the query
-        self.restaurant_type_route_chain = route_prompt | self.llm.with_structured_output(RestaurantType) | itemgetter("restaurant_type")
+        restaurant_type_route_chain = route_prompt | self.llm.with_structured_output(RestaurantType) | itemgetter("restaurant_type")
+        return restaurant_type_route_chain
 
     def get_restaurant_recommendation_result(self, restaurant_type, query):
         if restaurant_type == 'general':
