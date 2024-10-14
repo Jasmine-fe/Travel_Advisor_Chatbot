@@ -1,5 +1,7 @@
 import streamlit as st
-from travel_chatbot import chatbot_chain
+from chatbot import Chatbot
+
+chatbot = Chatbot()
 
 # Initialize session state to store conversation
 if 'conversation' not in st.session_state:
@@ -14,11 +16,8 @@ def handle_input():
         # Store user input in the session state conversation list
         st.session_state.conversation.append(f"User: {user_input}")
         
-        # Prepare input data for chatbot
-        input_data = {"message": user_input}
-        
         # Get chatbot response
-        response = chatbot_chain.invoke(input_data)
+        response = chatbot.process_message(user_input)
         
         # Store chatbot response in the session state conversation list
         st.session_state.conversation.append(f"Chatbot: {response}")
