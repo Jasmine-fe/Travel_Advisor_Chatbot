@@ -1,4 +1,5 @@
 import os
+import streamlit as st
 from dotenv import load_dotenv
 from typing import Literal
 from operator import itemgetter
@@ -17,8 +18,8 @@ load_dotenv()
 
 
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
-os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
+os.environ["OPENAI_API_KEY"] = st.secrets['OPENAI_API_KEY']
+os.environ["LANGCHAIN_API_KEY"] = st.secrets['LANGCHAIN_API_KEY']
 
 class RestaurantType(TypedDict):
     restaurant_type: Literal["general", "michelin"]
@@ -84,7 +85,6 @@ class RestaurantChain:
         return general_restaurant_chain
 
     def build_michelin_recommendation_chain(self):
-        #TODO: optimize how to add additional information
         michelin_guide_template = """
             Information to understand the context: 
             Data: michelin guide restaurants 

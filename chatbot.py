@@ -1,4 +1,5 @@
 import os
+import streamlit as st
 from typing import Dict
 from dotenv import load_dotenv
 from chatbot_router import ChatbotRouter
@@ -9,8 +10,8 @@ class Chatbot:
     def __init__(self):
         load_dotenv()
         os.environ["LANGCHAIN_TRACING_V2"] = "true"
-        os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
-        os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
+        os.environ["OPENAI_API_KEY"] = st.secrets['OPENAI_API_KEY']
+        os.environ["LANGCHAIN_API_KEY"] = st.secrets['LANGCHAIN_API_KEY']
 
         self.service_prompts = {
             "tourist_attraction": "You are an expert in finding tourist attractions.",
