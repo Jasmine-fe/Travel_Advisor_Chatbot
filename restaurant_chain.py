@@ -1,6 +1,5 @@
 import os
 import streamlit as st
-from dotenv import load_dotenv
 from typing import Literal
 from operator import itemgetter
 from typing_extensions import TypedDict
@@ -14,8 +13,6 @@ from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_core.output_parsers import StrOutputParser
 from langchain_text_splitters import RecursiveCharacterTextSplitter, RecursiveJsonSplitter
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
-load_dotenv()
-
 
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["OPENAI_API_KEY"] = st.secrets['OPENAI_API_KEY']

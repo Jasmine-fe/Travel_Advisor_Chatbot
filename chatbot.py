@@ -1,14 +1,12 @@
 import os
 import streamlit as st
 from typing import Dict
-from dotenv import load_dotenv
 from chatbot_router import ChatbotRouter
 from chatbot_service import ChatbotService
 from restaurant_chain import RestaurantChain
 
 class Chatbot:
     def __init__(self):
-        load_dotenv()
         os.environ["LANGCHAIN_TRACING_V2"] = "true"
         os.environ["OPENAI_API_KEY"] = st.secrets['OPENAI_API_KEY']
         os.environ["LANGCHAIN_API_KEY"] = st.secrets['LANGCHAIN_API_KEY']
