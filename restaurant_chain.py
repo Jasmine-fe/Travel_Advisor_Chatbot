@@ -13,23 +13,26 @@ from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_core.output_parsers import StrOutputParser
 from langchain_text_splitters import RecursiveCharacterTextSplitter, RecursiveJsonSplitter
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
+from build_RAG_db import build_michelin_database
+from langchain.memory import ConversationBufferMemory
 
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["OPENAI_API_KEY"] = st.secrets['OPENAI_API_KEY']
-os.environ["LANGCHAIN_API_KEY"] = st.secrets['LANGCHAIN_API_KEY']
+if 'LANGCHAIN_TRACING_V2' not in st.session_state:
+    st.session_state.LANGCHAIN_TRACING_V2 = "true"
+    os.environ["LANGCHAIN_TRACING_V2"] = "true"
 
 class RestaurantType(TypedDict):
     restaurant_type: Literal["general", "michelin"]
 
 class RestaurantChain:
-    def __init__(self):
+    def __init__(self, memory: ConversationBufferMemory):
         """
         Initializes the RestaurantChain object with necessary components like LLM chain and prompt template.        
         """
         self.llm = ChatOpenAI(model="gpt-3.5-turbo")
         
+        # Use shared memory passed from Chatbot
+        self.memory = memory
         
-        self.michelin_guide_chain = None
         self.embeddings = OpenAIEmbeddings()
         self.retriever = self.build_michelin_guide_rag()
         self.general_restaurant_chain = self.build_general_recommendation_chain()
@@ -38,16 +41,17 @@ class RestaurantChain:
 
 
     def build_michelin_guide_rag(self):
-        ## Build a RAG for Michelin guide information
-        vectorstore = Chroma(collection_name="michelin_guide_restaurants", embedding_function=self.embeddings)
-        
-        # Check if data already exists in Chroma
-        if vectorstore.get()['ids']:
-            print("Loading existing data from Chroma...")
-        else:
-            print("No existing data found. Loading from CSV and storing in Chroma...")
-            self._load_and_store_data(vectorstore)
 
+        persist_directory = "chroma_db"
+        if not os.path.exists(persist_directory):
+            build_michelin_database()
+
+        vectorstore = Chroma(
+            collection_name="michelin_guide_restaurants", 
+            embedding_function=self.embeddings,
+            persist_directory=persist_directory
+        )
+        
         store = InMemoryStore()
         child_splitter = RecursiveCharacterTextSplitter(chunk_size=200)
         
@@ -56,29 +60,28 @@ class RestaurantChain:
             docstore=store,
             child_splitter=child_splitter,
         )
-        return retriever
 
-    def _load_and_store_data(self, vectorstore):
-        michelin_guide_restaurants_path = "dataset/test_canada_michelin_guide_restaurants_Aug2024.csv"
-        loader = CSVLoader(
-            file_path=michelin_guide_restaurants_path,
-            source_column='Name',
-            csv_args={
-                "delimiter": ",",
-                "quotechar": '"',
-                "fieldnames": ['Name', 'Address', 'Location', 'Price', 'Cuisine', 'Longitude', 'Latitude', 'PhoneNumber', 'Url', 'WebsiteUrl', 'Award', 'GreenStar', 'FacilitiesAndServices', 'Description']
-            },
-        )
-        documents = loader.load()
-        vectorstore.add_documents(documents)
+        return retriever
 
     def build_general_recommendation_chain(self):
         general_restaurant_template = """
-            You are a restaurant recommendation chatbot, you need to provide relevant suggestions based on their preference.  
-            Question: {question}
+            You are a restaurant recommendation chatbot, you need to provide relevant suggestions based on their preference.
+            
+            Previous conversation:
+            {history}
+            
+            Question: {input}
         """
-        general_restaurant_prompt_template = ChatPromptTemplate.from_template(general_restaurant_template)
-        general_restaurant_chain = general_restaurant_prompt_template | self.llm | StrOutputParser()    
+        general_restaurant_prompt = ChatPromptTemplate.from_template(general_restaurant_template)
+        
+        general_restaurant_chain = (
+            {"input": RunnablePassthrough(),
+             "history": lambda _: self.memory.load_memory_variables({})["history"]}
+            | general_restaurant_prompt 
+            | self.llm 
+            | StrOutputParser()
+        )
+        
         return general_restaurant_chain
 
     def build_michelin_recommendation_chain(self):
@@ -97,12 +100,27 @@ class RestaurantChain:
                 GreenStar: Indicates whether the restaurant has a Michelin Green Star for sustainability.
                 Description: A brief summary highlighting the restaurant's ambiance, menu, and standout dishes.
 
+            Previous conversation:
+            {history}
+            
             Answer the question based on the following context: {context}
-            Question: {question}
+            Question: {input}
         """
 
-        michelin_guide_prompt_template = ChatPromptTemplate.from_template(michelin_guide_template)
-        michelin_guide_chain = {"context": self.retriever, "question": RunnablePassthrough()} | michelin_guide_prompt_template | self.llm | StrOutputParser()
+        michelin_guide_prompt = ChatPromptTemplate.from_template(michelin_guide_template)
+        
+        michelin_guide_chain = (
+            {
+                "context": self.retriever, 
+                "input": RunnablePassthrough(),
+                "history": lambda _: self.memory.load_memory_variables({})["history"]
+            } 
+            | michelin_guide_prompt 
+            | self.llm 
+            | StrOutputParser()
+        )
+        
+        # Don't forget to save the context after getting responses
         return michelin_guide_chain
 
     def define_restaurant_type_route_chain(self):
@@ -130,8 +148,11 @@ class RestaurantChain:
     def get_restaurant_chain(self):
         restaurant_chain = {
             "restaurant_type": self.restaurant_type_route_chain,
-            "message": lambda x: x['message']
+            "message": RunnablePassthrough()
         } | RunnableLambda(
-            lambda x: self.get_restaurant_recommendation_result(restaurant_type=x["restaurant_type"], query=x['message'])
+            lambda x: self.get_restaurant_recommendation_result(
+                restaurant_type=x["restaurant_type"], 
+                query=x["message"]
+            )
         )
         return restaurant_chain
