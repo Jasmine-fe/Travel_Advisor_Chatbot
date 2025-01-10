@@ -24,21 +24,13 @@ class RestaurantType(TypedDict):
     restaurant_type: Literal["general", "michelin"]
 
 class RestaurantChain:
-    def __init__(self, memory: ConversationBufferMemory):
-        """
-        Initializes the RestaurantChain object with necessary components like LLM chain and prompt template.        
-        """
+    def __init__(self):
         self.llm = ChatOpenAI(model="gpt-3.5-turbo")
-        
-        # Use shared memory passed from Chatbot
-        self.memory = memory
-        
         self.embeddings = OpenAIEmbeddings()
         self.retriever = self.build_michelin_guide_rag()
         self.general_restaurant_chain = self.build_general_recommendation_chain()
         self.michelin_guide_chain = self.build_michelin_recommendation_chain()
         self.restaurant_type_route_chain = self.define_restaurant_type_route_chain()
-
 
     def build_michelin_guide_rag(self):
 
@@ -67,16 +59,12 @@ class RestaurantChain:
         general_restaurant_template = """
             You are a restaurant recommendation chatbot, you need to provide relevant suggestions based on their preference.
             
-            Previous conversation:
-            {history}
-            
             Question: {input}
         """
         general_restaurant_prompt = ChatPromptTemplate.from_template(general_restaurant_template)
         
         general_restaurant_chain = (
-            {"input": RunnablePassthrough(),
-             "history": lambda _: self.memory.load_memory_variables({})["history"]}
+            {"input": RunnablePassthrough()}
             | general_restaurant_prompt 
             | self.llm 
             | StrOutputParser()
@@ -100,9 +88,6 @@ class RestaurantChain:
                 GreenStar: Indicates whether the restaurant has a Michelin Green Star for sustainability.
                 Description: A brief summary highlighting the restaurant's ambiance, menu, and standout dishes.
 
-            Previous conversation:
-            {history}
-            
             Answer the question based on the following context: {context}
             Question: {input}
         """
@@ -112,15 +97,13 @@ class RestaurantChain:
         michelin_guide_chain = (
             {
                 "context": self.retriever, 
-                "input": RunnablePassthrough(),
-                "history": lambda _: self.memory.load_memory_variables({})["history"]
+                "input": RunnablePassthrough()
             } 
             | michelin_guide_prompt 
             | self.llm 
             | StrOutputParser()
         )
         
-        # Don't forget to save the context after getting responses
         return michelin_guide_chain
 
     def define_restaurant_type_route_chain(self):

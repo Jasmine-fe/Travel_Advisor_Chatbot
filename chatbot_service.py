@@ -30,6 +30,5 @@ class ChatbotService:
 
     def process_message(self, message: str) -> str:
         response = self.chain.invoke({"message": message})
-        self.memory.chat_memory.add_user_message(message)
-        self.memory.chat_memory.add_ai_message(response)
+        self.memory.save_context({"input": message}, {"output": response})
         return response

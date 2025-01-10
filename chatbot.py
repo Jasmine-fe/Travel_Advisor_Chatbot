@@ -1,15 +1,16 @@
 import os
 import streamlit as st
 from typing import Dict
+from dotenv import load_dotenv
 from chatbot_router import ChatbotRouter
 from chatbot_service import ChatbotService
 from restaurant_chain import RestaurantChain
 
+load_dotenv()
+
 class Chatbot:
     def __init__(self):
         os.environ["LANGCHAIN_TRACING_V2"] = "true"
-        os.environ["OPENAI_API_KEY"] = st.secrets['OPENAI_API_KEY']
-        os.environ["LANGCHAIN_API_KEY"] = st.secrets['LANGCHAIN_API_KEY']
 
         self.service_prompts = {
             "tourist_attraction": "You are an expert in finding tourist attractions.",
@@ -31,7 +32,13 @@ class Chatbot:
 
     def process_message(self, message: str) -> str:
         service_type = self.router.route_message(message)
-        if service_type in self.services:
-            return self.services[service_type].process_message(message)
-        else:
+        print("service_type:", service_type)
+        if service_type not in self.services:
             raise ValueError(f"Unknown service type: {service_type}")
+            
+        # Special handling for restaurant recommendations
+        if service_type == 'restaurant_recommendations':
+            return self.services[service_type].invoke(message)
+        
+        # Regular handling for other services
+        return self.services[service_type].process_message(message)
