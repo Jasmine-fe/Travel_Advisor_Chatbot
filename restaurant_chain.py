@@ -14,7 +14,6 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_text_splitters import RecursiveCharacterTextSplitter, RecursiveJsonSplitter
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 from build_RAG_db import build_michelin_database
-from langchain.memory import ConversationBufferMemory
 
 if 'LANGCHAIN_TRACING_V2' not in st.session_state:
     st.session_state.LANGCHAIN_TRACING_V2 = "true"
