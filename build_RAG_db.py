@@ -28,7 +28,7 @@ def build_michelin_database():
     )
 
     # Load and store data
-    michelin_guide_restaurants_path = "dataset/test_canada_michelin_guide_restaurants_Aug2024.csv"
+    michelin_guide_restaurants_path = "dataset/canada_michelin_guide_restaurants_Aug2024.csv"
     loader = CSVLoader(
         file_path=michelin_guide_restaurants_path,
         source_column='Name',
