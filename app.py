@@ -11,16 +11,16 @@ if 'conversation' not in st.session_state:
 def handle_input():
     user_input = st.session_state.user_input
     if user_input.lower() == 'exit':
-        st.session_state.conversation.append("Chatbot: Thank you for using the service. Goodbye!")
+        st.session_state.conversation.append({"role": "chatbot", "content": "Thank you for using the service. Goodbye!"})
     elif user_input:
         # Store user input in the session state conversation list
-        st.session_state.conversation.append(f"User: {user_input}")
+        st.session_state.conversation.append({"role": "user", "content": user_input})
         
         # Get chatbot response
         response = chatbot.process_message(user_input)
         
         # Store chatbot response in the session state conversation list
-        st.session_state.conversation.append(f"Chatbot: {response}")
+        st.session_state.conversation.append({"role": "chatbot", "content": response})
         
     # Clear the input field after submission
     st.session_state.user_input = ""
@@ -29,7 +29,7 @@ def handle_input():
 st.markdown("<h1 style='text-align: center;'>Travel Chatbot</h1>", unsafe_allow_html=True)
 st.markdown("<h3 style='text-align: center;'>Your personal travel assistant</h3>", unsafe_allow_html=True)
 
-# Custom CSS for chat bubbles and fixed input box at the bottom
+# Custom CSS for chat bubbles, headshots, and fixed input box at the bottom
 st.markdown("""
     <style>
     .chat-container {
@@ -60,6 +60,13 @@ st.markdown("""
     .user-bubble, .chatbot-bubble {
         display: inline-block;
     }
+    .user-bubble img, .chatbot-bubble img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
     .input-container {
         position: fixed;
         bottom: 0;
@@ -74,12 +81,21 @@ st.markdown("""
 # Create a container for the conversation history
 st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
 
-# Display the conversation history in reverse (latest first), with chat bubbles
+# Display the conversation history with chat bubbles and headshots
 for message in st.session_state.conversation:
-    if message.startswith("User:"):
-        st.markdown(f"<div class='user-bubble'>{message}</div>", unsafe_allow_html=True)
+    if message["role"] == "user":
+        st.markdown(f"<div class='user-bubble'>{message['content']}</div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div class='chatbot-bubble'>{message}</div>", unsafe_allow_html=True)
+        st.markdown(f"""
+            <div style="display: flex; align-items: flex-start; gap: 10px;">
+                <img src="https://scx2.b-cdn.net/gfx/news/2019/3-robot.jpg" 
+                     alt="Chatbot Avatar" 
+                     style="width: 40px; height: 40px; border-radius: 50%;">
+                <div class='chatbot-bubble'>
+                    {message['content']}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
 
 st.markdown("</div>", unsafe_allow_html=True)
 
