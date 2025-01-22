@@ -1,23 +1,17 @@
 import os
-import streamlit as st
 from typing import Literal
 from operator import itemgetter
 from typing_extensions import TypedDict
 from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI
 from langchain.storage import InMemoryStore
-from langchain_community.document_loaders.csv_loader import CSVLoader
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.retrievers import ParentDocumentRetriever
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_core.output_parsers import StrOutputParser
-from langchain_text_splitters import RecursiveCharacterTextSplitter, RecursiveJsonSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
-from build_RAG_db import build_michelin_database
-
-if 'LANGCHAIN_TRACING_V2' not in st.session_state:
-    st.session_state.LANGCHAIN_TRACING_V2 = "true"
-    os.environ["LANGCHAIN_TRACING_V2"] = "true"
+from src.utils.build_RAG_db import build_michelin_database
 
 class RestaurantType(TypedDict):
     restaurant_type: Literal["general", "michelin"]
@@ -33,7 +27,7 @@ class RestaurantChain:
 
     def build_michelin_guide_rag(self):
 
-        persist_directory = "chroma_db"
+        persist_directory = "data/embeddings_chroma"
         if not os.path.exists(persist_directory):
             build_michelin_database()
 
@@ -81,8 +75,8 @@ class RestaurantChain:
                 Location: City and country of the restaurant.
                 Price: The average cost range represented by symbols (e.g., $, $$, $$$).
                 Cuisine: Type of cuisine offered by the restaurant.
-                Coordinates: Longitude and latitude for mapping the restaurant’s location.
-                Contact Information: Phone number and URLs for the Michelin Guide page and the restaurant’s official website.
+                Coordinates: Longitude and latitude for mapping the restaurant's location.
+                Contact Information: Phone number and URLs for the Michelin Guide page and the restaurant's official website.
                 Award: Michelin distinction (e.g., Michelin Star, Bib Gourmand, Selected Restaurants).
                 GreenStar: Indicates whether the restaurant has a Michelin Green Star for sustainability.
                 Description: A brief summary highlighting the restaurant's ambiance, menu, and standout dishes.

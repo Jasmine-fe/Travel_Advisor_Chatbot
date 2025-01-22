@@ -2,7 +2,7 @@
 
 This project is a travel chatbot built using OpenAI's API that provides helpful travel-related services. The chatbot uses the latest language model from OpenAI to interact with users and offer recommendations or insights related to travel. Whether you're exploring new destinations, looking for a place to eat, or planning your next trip, this chatbot is designed to help.
 
-## Features
+## Features 
 
 The chatbot offers five key services:
 - **Tourist Attraction**: Find recommendations for tourist spots based on the user's preferences or location.

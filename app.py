@@ -1,5 +1,5 @@
 import streamlit as st
-from chatbot import Chatbot
+from src.chatbot import Chatbot
 
 chatbot = Chatbot()
 
@@ -87,13 +87,9 @@ for message in st.session_state.conversation:
         st.markdown(f"<div class='user-bubble'>{message['content']}</div>", unsafe_allow_html=True)
     else:
         st.markdown(f"""
-            <div style="display: flex; align-items: flex-start; gap: 10px;">
-                <img src="https://scx2.b-cdn.net/gfx/news/2019/3-robot.jpg" 
-                     alt="Chatbot Avatar" 
-                     style="width: 40px; height: 40px; border-radius: 50%;">
-                <div class='chatbot-bubble'>
-                    {message['content']}
-                </div>
+            <div class='chatbot-bubble'>
+                <img src="https://plus.unsplash.com/premium_photo-1682023585957-f191203ab239?q=80&w=2884&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Chatbot Avatar">
+                {message['content']}
             </div>
         """, unsafe_allow_html=True)
 

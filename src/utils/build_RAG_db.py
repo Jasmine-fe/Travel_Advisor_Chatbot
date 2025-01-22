@@ -20,7 +20,7 @@ def build_michelin_database():
     embeddings = OpenAIEmbeddings()
     
     # Set up Chroma with persist_directory
-    persist_directory = "chroma_db"
+    persist_directory = "data/embeddings_chroma"
     vectorstore = Chroma(
         collection_name="michelin_guide_restaurants",
         embedding_function=embeddings,
@@ -28,9 +28,9 @@ def build_michelin_database():
     )
 
     # Load and store data
-    michelin_guide_restaurants_path = "dataset/canada_michelin_guide_restaurants_Aug2024.csv"
+    michelin_guide_restaurants_file_path = "data/dataset/canada_michelin_guide_restaurants_Aug2024.csv"
     loader = CSVLoader(
-        file_path=michelin_guide_restaurants_path,
+        file_path=michelin_guide_restaurants_file_path,
         source_column='Name',
         csv_args={
             "delimiter": ",",
