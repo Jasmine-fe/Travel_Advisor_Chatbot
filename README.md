@@ -1,18 +1,42 @@
-# Travel Chatbot Using OpenAI API
+# LLM Travel Chatbot with Michelin Restaurant RAG
 
-This project is a travel chatbot built using OpenAI's API that provides helpful travel-related services. The chatbot uses the latest language model from OpenAI to interact with users and offer recommendations or insights related to travel. Whether you're exploring new destinations, looking for a place to eat, or planning your next trip, this chatbot is designed to help.
+## Overview
 
-## Features 
+This project is a sophisticated travel chatbot powered by a large language model (LLM) that provides users with personalized travel-related services. The chatbot leverages OpenAI's API to interact with users, offering recommendations and insights tailored to their travel preferences. A key feature of this chatbot is its ability to recommend Michelin-starred restaurants through a Retrieval-Augmented Generation (RAG) approach.
 
-The chatbot offers five key services:
-- **Tourist Attraction**: Find recommendations for tourist spots based on the user's preferences or location.
-- **Itinerary Planning**: Help users plan their trip itineraries by suggesting the best routes, activities, and schedules.
-- **Restaurant Recommendations**: Recommend restaurants based on user preferences, including specific requests like finding Michelin-starred restaurants.
-- **Exploring Travel Ideas**: Inspire users by suggesting new travel destinations or experiences based on their interests.
-- **Others**: Provide miscellaneous travel-related information and assistance not covered by the main services.
+## Features
+
+The chatbot offers a variety of services, including:
+
+- **Tourist Attraction Recommendations**: Discover popular tourist spots based on user preferences or location.
+- **Itinerary Planning**: Assist users in planning their travel itineraries by suggesting optimal routes, activities, and schedules.
+- **Restaurant Recommendations**: Provide personalized restaurant suggestions, including Michelin-starred options, based on user preferences.
+- **Exploring Travel Ideas**: Inspire users with new travel destinations or experiences tailored to their interests.
+- **Miscellaneous Travel Assistance**: Offer additional travel-related information and support not covered by the main services.
 
 ## Project Structure
 
-- `main.py`: The main script to run the chatbot, which initializes and integrates all services using OpenAI’s API.
-- `restaurant_chain.py`: Contains functionality related to recommending restaurants, including an internal data set of Michelin-starred restaurants.
-- `travel_chatbot.py`: Core logic of the chatbot, defining service types and how the chatbot handles different user requests.
+The project consists of the following key components:
+
+- `app.py`: The main application file that runs the chatbot interface using Streamlit.
+- `chatbot.py`: Contains the core logic for processing user messages and routing them to the appropriate services.
+- `chains/restaurant_chain.py`: Implements the restaurant recommendation logic, including the RAG approach for Michelin restaurants.
+- `services/chatbot_service.py`: Defines the chatbot service that interacts with the LLM.
+- `services/router_service.py`: Routes user messages to the appropriate service based on their content.
+- `utils/build_RAG_db.py`: Builds and persists the Michelin restaurant database for retrieval.
+- `utils/long_term_memory.py`: Manages long-term memory for the chatbot to enhance user interactions.
+
+## Usage
+
+To run the chatbot, execute the following command:
+
+```bash
+streamlit run app.py
+```
+
+Open your web browser and navigate to `http://localhost:8501` to interact with the chatbot.
+
+## Acknowledgments
+
+- OpenAI for providing the API and models that power the chatbot.
+- The Langchain library for facilitating the implementation of RAG and LLM interactions.
