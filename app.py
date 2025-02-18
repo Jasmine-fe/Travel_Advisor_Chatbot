@@ -60,13 +60,6 @@ st.markdown("""
     .user-bubble, .chatbot-bubble {
         display: inline-block;
     }
-    .user-bubble img, .chatbot-bubble img {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        margin-right: 10px;
-        vertical-align: middle;
-    }
     .input-container {
         position: fixed;
         bottom: 0;
@@ -88,7 +81,6 @@ for message in st.session_state.conversation:
     else:
         st.markdown(f"""
             <div class='chatbot-bubble'>
-                <img src="https://plus.unsplash.com/premium_photo-1682023585957-f191203ab239?q=80&w=2884&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Chatbot Avatar">
                 {message['content']}
             </div>
         """, unsafe_allow_html=True)
