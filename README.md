@@ -4,9 +4,7 @@
 
 This project is a sophisticated travel chatbot powered by a large language model (LLM) that provides users with personalized travel-related services. The chatbot leverages OpenAI's API to interact with users, offering recommendations and insights tailored to their travel preferences. A key feature of this chatbot is its ability to recommend Michelin-starred restaurants through a Retrieval-Augmented Generation (RAG) approach.
 
-[![Demo Video]([THUMBNAIL_IMAGE_PATH](https://github.com/Jasmine-fe/Travel_Advisor_Chatbot/blob/main/demo/thumbnail_image.png))](https://github.com/Jasmine-fe/Travel_Advisor_Chatbot/blob/main/demo/demo.mp4)
-
-
+https://github.com/user-attachments/assets/094c5d54-4e59-45f1-99dc-c86333721bb3
 
 
 ## Features
